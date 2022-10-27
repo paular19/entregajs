@@ -1,125 +1,108 @@
-const pizzasList=[
+const pizzas=[
    {
-        nombre: "Especial",
+        nombre: "Italiana",
          id: 1,
          ingredientes:["tomate","queso","jamon"],
          precio: "$800",
+         img: "./img/italiana.jpg",
      },
 
      {
-         nombre: "Muzzarella",
+         nombre: "Margarita",
          id: 2,
         ingredientes:["tomate","queso","cebolla"],
          precio: "$700",
+         img: "./img/margarita.jpg",
     },
 
    {
-             nombre: "Cantimpalo",
+             nombre: "Pepperoni",
          id: 3,
          ingredientes:["tomate","queso","cantimpalo"],
          precio: "$700",
+         img: "./img/peperoni.jpg",
      },
 
      {
-         nombre: "Turca",
+         nombre: "Hongos",
          id: 4,
          ingredientes:["tomate","queso","ajo"],
-
          precio: "$700",
+         img: "./img/hongos.jpg",
     }
  ]
 
-const inputN = document.getElementById("inputpizza");
+//traemos los elementos del dom necesarios para realizar el ejercicio
 
-const isEmpty = (input) => !input.length;
-
-const cardsContainer=document.getElementById("container-pizza-renderizado");
-
-const cError = (input) => {
-  const formField = input.parentElement;
-  formField.classList.remove("error");
-  const error = formField.querySelector("small");
-  error.textContent = "";
-};
-
-const sError = (input, message) => {
-  const formField = input.parentElement;
-  formField.classList.add("error");
-  const error = formField.querySelector("small");
-  error.textContent = message;
-};
-
-
-const NumberInput = () => {
-  let valid = false;
-  const inputValor = inputN.value;
-  if (isEmpty(inputValor)) {
-    sError(inputN);
-  } else if (!inputValor > 0 && !inputValor <= 3) {
-    sError(inputN);
-  } else {
-    cError(inputN);
-    valid = true;
-  }
-  return valid;
-};
-
-const FormValid = () => {
-  return NumberInput(inputN);
-};
+const resultContainer = document.getElementById("result-container");
 const form = document.getElementById("form");
-const containerPizzas = document.getElementById("container-pizza-renderizado");
+const input = document.querySelector(".form_input");
 
-let pizzas = JSON.parse(localStorage.getItem("pizzas")) || [];
-const saveLocalStorage = () => {
-  localStorage.setItem("pizzas", JSON.stringify(pizzas));
+function obtenerlocals(){
+  pizzas=localStorage.getItem(searchPizza)
+}
+
+function savelocals(){
+  localStorage.setItem("pizzas",JSON.stringify(pizzas));
+}
+console.log(savelocals);
+
+
+
+
+
+//buscar el array de pizza que coincida con el valor dado por parametro
+const searchPizza = (value) => pizzas.find((pizza) => pizza.id === value);
+
+const showEmptyError = () =>{
+   resultContainer.innerHTML =`
+   <div class="pizza-container">
+            <h2 class="error-title">Por favor ingrese un número para poder buscar en el menú</h2>
+            <img src= ./img/buscar.png>
+          </div>`;
 };
 
-const saveData = () => {
-  const inputValor = inputN.value;
-  const findPizza = pizzasList.find((e) => e.id == inputValor) || [];
-  pizzas = [
-    ...pizzas,
-    {
-      id: findPizza.id,
-      nombre: findPizza.nombre,
-      precio: findPizza.precio,
-    },
-  ];
-};
-
-const renderizado = (pizza) => {
-  const { id, nombre, ingredientes, precio } = pizza;
-  return `<br>
-            El id ${id} pertence a la pizza ${nombre}, y su
-           precio  es: ${precio}<br><br>
-          `;
-};
-
-const renderPizza = () => {
-  cardsContainer.innerHTML = pizzas.map(renderizado).join("");
-};
-
-const isValidForm = () => {
-  return NumberInput(inputN);
-};
-const submitForm = (e) => {
-  e.preventDefault();
-  if (isValidForm()) {
-    saveData();
-    saveLocalStorage();
-    renderPizza();
-    form.reset();
+const renderResult = (pizza) => {
+  if(!pizza){
+    resultContainer.innerHTML=`
+   <div class="pizza-container">
+      <h2 class="error-title">No existe una pizza con el ID ingresado</h2>
+      <img src= ./img/404.png>
+  </div>
+    `;
+  }else{
+    resultContainer.innerHTML=`        
+    <div class="pizza-container">
+    <h2 class="result-title">${pizza.nombre}</h2>
+    <h3 class="result-price">${pizza.precio}</h3>
+    <img src= ${pizza.img}>
+    <p>Realice una nueva busqueda</p>
+  </div> 
+    `
+    
   }
+
+  }
+
+
+
+
+const submitSearch = (e) =>{
+  e.preventDefault();
+  const searchedValue = input.value;
+  if(!searchedValue){
+    showEmptyError();
+    return;
+  }
+  const searchedPizza = searchPizza(Number(searchedValue));
+  renderResult(searchedPizza);
+  form.reset();
 };
 
-const init = () => {
-  window.addEventListener("DOMContentLoaded", renderPizza(pizzas));
-  form.addEventListener("submit", submitForm);
+
+const init= () => {
+  form.addEventListener("submit",submitSearch)
+
 };
 
-init();
-
-
-
-
+init()
